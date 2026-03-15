@@ -1,12 +1,11 @@
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
-from typing_extensions import TYPE_CHECKING, TypedDict
+from typing_extensions import TypedDict
 
 from litellm.types.llms.openai import (
     AllMessageValues,
     ChatCompletionToolCallChunk,
-    ChatCompletionToolParam,
 )
 from litellm.types.proxy.guardrails.guardrail_hooks.base import GuardrailConfigModel
 from litellm.types.utils import ChatCompletionMessageToolCall
@@ -57,7 +56,9 @@ class GenericGuardrailAPIRequest(BaseModel):
     ]  # the trace id of the LLM call - useful if there are multiple LLM calls for the same conversation
     structured_messages: Optional[List[AllMessageValues]]
     images: Optional[List[str]]
-    tools: Optional[List[ChatCompletionToolParam]]
+    # Dict[str, Any] to support all tool types (function, mcp, etc.)
+    # without coupling to a specific tool schema.
+    tools: Optional[List[Dict[str, Any]]]
     texts: Optional[List[str]]
     request_data: GenericGuardrailAPIMetadata
     additional_provider_specific_params: Optional[Dict[str, Any]]
@@ -71,7 +72,7 @@ class GenericGuardrailAPIResponse:
 
     texts: Optional[List[str]]
     images: Optional[List[str]]
-    tools: Optional[List[ChatCompletionToolParam]]
+    tools: Optional[List[Dict[str, Any]]]
     action: str
     blocked_reason: Optional[str]
 
@@ -81,7 +82,7 @@ class GenericGuardrailAPIResponse:
         texts: Optional[List[str]] = None,
         blocked_reason: Optional[str] = None,
         images: Optional[List[str]] = None,
-        tools: Optional[List[ChatCompletionToolParam]] = None,
+        tools: Optional[List[Dict[str, Any]]] = None,
     ):
         self.action = action
         self.blocked_reason = blocked_reason
